@@ -11,11 +11,11 @@ import scraper
 
 # VARIABLES
 dotenv.load_dotenv()
-TOKEN = os.getenv('TOKEN')
-OWNER = int(os.getenv('OWNER'))
-ADMIN = int(os.getenv('ADMIN'))
-LOGS = int(os.getenv('LOG_CHANNEL'))
-SERVERID = int(os.getenv('SERVER_ID'))
+TOKEN: str = os.getenv('TOKEN')
+OWNER: int = int(os.getenv('OWNER'))
+ADMIN: int = int(os.getenv('ADMIN'))
+LOGS: int = int(os.getenv('LOG_CHANNEL'))
+SERVERID: int = int(os.getenv('SERVER_ID'))
 GUILD = discord.Object(id=SERVERID)
 
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
@@ -214,6 +214,16 @@ async def on_ready():
     print("Bot is online! 🟢  ")
 
 @bot.event
+async def on_disconnect():
+    embed = discord.Embed(
+        title="Bot Status",
+        description="Bot is offline! 🔴",
+        color=discord.Color.red(),
+        timestamp=datetime.now()
+    )
+    await bot.get_channel(LOGS).send(embed=embed)
+
+@bot.event
 async def on_member_join(member):
     
     role = discord.utils.get(member.guild.roles, name='Member')
@@ -228,9 +238,13 @@ async def on_member_join(member):
         embed.set_author(name="InfoBuddy")
         embed.set_image(url=f"{member.avatar.url}")
         embed.set_footer(text="InfoBuddy")
+        embed.set_thumbnail(url=member.guild.icon.url)
         await channel.send(embed=embed)
        
 # Bot Periodic Tasks
+
+
+
 
 # Check for new notices every 15 minutes that's 96 times a day
 @tasks.loop(minutes=15)
