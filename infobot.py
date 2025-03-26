@@ -27,7 +27,6 @@ def search_for_notice_updates():
     NEW_NOTICES = [notice for notice in FETCH_NOTICES if not any(existing[2] == notice[0] and existing[3] == urllib.parse.urljoin('https://www.soa.ac.in/', notice[1]) for existing in SAVED_NOTICES)]
     return NEW_NOTICES
 
-
 def save_notices(notices):
     NOTICES = scraper.load_notices()
     for notice in notices:
@@ -73,7 +72,15 @@ async def purge(interaction: discord.Interaction, limit: int):
     if interaction.user.id == OWNER or discord.utils.get(interaction.user.roles, id=ADMIN):
         await interaction.response.defer(ephemeral=True)
         await interaction.channel.purge(limit=limit)
-        await interaction.followup.send(f'Purged {limit} messages!', ephemeral=True)  # Use followup to send the response
+        await interaction.followup.send(f'Purged {limit} messages!', ephemeral=True)
+        
+        embed = discord.Embed(
+            title="Purge",
+            description=f"{interaction.user} purged {limit} messages in {interaction.channel}.",
+            color=discord.Color.orange(),
+            timestamp=datetime.now()
+        )
+        await bot.get_channel(LOGS).send(embed=embed)
     else:
         await interaction.response.send_message('You do not have permission to use this command.', ephemeral=True)
 
@@ -86,6 +93,14 @@ async def kick(interaction: discord.Interaction, user: discord.Member, *, reason
         else:
             await user.kick(reason=reason)
             await interaction.response.send_message(f'{user} has been kicked for {reason}.')
+            
+            embed = discord.Embed(
+                title="Kick",
+                description=f"{interaction.user} kicked {user} for {reason}.",
+                color=discord.Color.red(),
+                timestamp=datetime.now()
+            )
+            await bot.get_channel(LOGS).send(embed=embed)
     else:
         await interaction.response.send_message('You do not have permission to use this command.')
 
@@ -98,6 +113,14 @@ async def ban(interaction: discord.Interaction, user: discord.Member, *, reason:
         else:
             await user.ban(reason=reason)
             await interaction.response.send_message(f'{user} has been banned for {reason}.')
+            
+            embed = discord.Embed(
+                title="Ban",
+                description=f"{interaction.user} banned {user} for {reason}.",
+                color=discord.Color.red(),
+                timestamp=datetime.now()
+            )
+            await bot.get_channel(LOGS).send(embed=embed)
     else:
         await interaction.response.send_message('You do not have permission to use this command.')
 
@@ -112,6 +135,14 @@ async def unban(interaction: discord.Interaction, *, user: str):
             if (user.name, user.discriminator) == (member_name, member_discriminator):
                 await interaction.guild.unban(user)
                 await interaction.response.send_message(f'{user} has been unbanned.')
+                
+                embed = discord.Embed(
+                    title="Unban",
+                    description=f"{interaction.user} unbanned {user}.",
+                    color=discord.Color.green(),
+                    timestamp=datetime.now()
+                )
+                await bot.get_channel(LOGS).send(embed=embed)
                 return
         await interaction.response.send_message(f'{user} was not found in the ban list.')
     else:
@@ -125,6 +156,13 @@ async def mute(interaction: discord.Interaction, user: discord.Member):
         if role:
             await user.add_roles(role)
             await interaction.response.send_message(f'{user} has been muted.')
+            embed = discord.Embed(
+                title="Mute",
+                description=f"{interaction.user} muted {user}.",
+                color=discord.Color.orange(),
+                timestamp=datetime.now()
+            )
+            await bot.get_channel(LOGS).send(embed=embed)
         else:
             await interaction.response.send_message('Muted role not found.')
     else:
@@ -138,6 +176,13 @@ async def unmute(interaction: discord.Interaction, user: discord.Member):
         if role:
             await user.remove_roles(role)
             await interaction.response.send_message(f'{user} has been unmuted.')
+            embed = discord.Embed(
+                title="Unmute",
+                description=f"{interaction.user} unmuted {user}.",
+                color=discord.Color.green(),
+                timestamp=datetime.now()
+            )
+            await bot.get_channel(LOGS).send(embed=embed)
         else:
             await interaction.response.send_message('Muted role not found.')
     else:
@@ -148,8 +193,7 @@ async def unmute(interaction: discord.Interaction, user: discord.Member):
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
-    await bot.change_presence(activity=discord.Game(name='!help'))
-    print(discord.utils.get(bot.get_all_channels(), name='announcements'))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="over the server 👀"))
     try:
         synced = await bot.tree.sync(guild=GUILD)
         print(f"Synced {len(synced)} command(s)")
@@ -159,6 +203,15 @@ async def on_ready():
     if not check_notices.is_running():
         check_notices.start()
         print("Started check_notices loop")
+        
+    embed = discord.Embed(
+        title="Bot Status",
+        description="Bot is online! 🟢",
+        color=discord.Color.green(),
+        timestamp=datetime.now()
+    )
+    await bot.get_channel(LOGS).send(embed=embed)
+    print("Bot is online! 🟢  ")
 
 @bot.event
 async def on_member_join(member):
@@ -206,9 +259,14 @@ async def check_notices():
             await channel.send(content=role.mention, embed=embed)
     
     save_notices(NOTICES)
-    await bot.get_channel(LOGS).send("Checked Notice Board for new notices!")
-
-
+    
+    embed = discord.Embed(
+        title="Notice Check",
+        description="Checked Notice Board for new notices!",
+        color=discord.Color.blue(),
+        timestamp=datetime.now()
+    )
+    await bot.get_channel(LOGS).send(embed=embed)
 
 # Bot Start
 bot.run(TOKEN)
