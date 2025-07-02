@@ -1,6 +1,6 @@
 # ITER Notice Bot 🔔
 
-A Discord bot that automatically monitors and posts new notices from the ITER website to your Discord server.
+A Discord bot that automatically monitors and posts new notices from the ITER website to your Discord server or join [this](https://discord.gg/eg8HjNWY) to get updates.
 
 ## Features
 
