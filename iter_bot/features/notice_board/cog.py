@@ -35,6 +35,7 @@ class NoticeCog(BaseCog):
         
         new_notices, all_notices = get_new_notices()
         if new_notices:
+            await channel.send(content = "@everyone")
             for notice in new_notices:
                 title = notice["Title"]
                 link = notice["Link"]
@@ -49,6 +50,15 @@ class NoticeCog(BaseCog):
         timestamp = f"<t:{int(time.time())}:R>"
         self.times_checked += 1
         await channel.edit(topic=f"Last Checked {timestamp} | Checked {self.times_checked}")
+        
+    @commands.command(name='checknotices', description="Force a notice check task.")
+    async def checknotices(self, ctx: commands.Context):
+        embed, file = await self.create_embed(
+            EmbedType.INFORMATION, '📌 Forced Notice Check', 'A manual notice check was triggered. Scanning for updates...'
+        )
+
+        await ctx.send(embed=embed, file=file) if file else await ctx.send(embed=embed)
+        await self.check_notices()
                 
 async def setup(bot: ITERBot):
     await bot.add_cog(NoticeCog(bot))
