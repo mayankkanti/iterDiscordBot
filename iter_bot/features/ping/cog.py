@@ -20,7 +20,7 @@ class PingCog(BaseCog):
             EmbedType.NORMAL, 'Pong! 🏓', f'**Bot latency**: {latency}ms'
         )
 
-        await ctx.send(embed=embed, file=file)
+        await ctx.send(embed=embed, file=file) if file else await ctx.send(embed=embed)
 
     @commands.command(name='hello', description="Check the bot's latency")
     async def hello(self, ctx: commands.Context):
@@ -29,7 +29,7 @@ class PingCog(BaseCog):
             EmbedType.NORMAL, 'Hi! 👋', f'**Bot latency**: {latency}ms'
         )
 
-        await ctx.send(embed=embed, file=file)
+        await ctx.send(embed=embed, file=file) if file else await ctx.send(embed=embed)
 
 async def setup(bot: ITERBot):
     await bot.add_cog(PingCog(bot))
