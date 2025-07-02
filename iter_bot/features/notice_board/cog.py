@@ -58,7 +58,7 @@ class NoticeCog(BaseCog):
         )
 
         await ctx.send(embed=embed, file=file) if file else await ctx.send(embed=embed)
-        await self.check_notices()
+        await self.notice_checker()
                 
 async def setup(bot: ITERBot):
     await bot.add_cog(NoticeCog(bot))
