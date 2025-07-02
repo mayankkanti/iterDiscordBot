@@ -1,10 +1,11 @@
-from os import environ, getenv
-if getenv("RAILWAY_ENVIRONMENT"):
-    print("Running on Railway, not loading .env")
-else:
-    from dotenv import load_dotenv
-    load_dotenv()
-TOKEN = environ.get('TOKEN') # Should raise if missing
-DEV_USER_ID = int(getenv('DEV'))
-NCHANNEL = int(getenv('NOTICE_CHANNEL'))
-LCHANNEL = int(getenv('LOG_CHANNEL'))
+from os import getenv
+
+TOKEN = getenv('TOKEN')
+DEV = getenv('DEV')
+NCHANNEL = getenv('NOTICE_CHANNEL')
+LCHANNEL = getenv('LOG_CHANNEL')
+
+
+DEV_USER_ID = int(DEV)
+NCHANNEL = int(NCHANNEL)
+LCHANNEL = int(LCHANNEL)
