@@ -25,5 +25,5 @@ async def get_embed(
         color=type.value.value,
         timestamp=datetime.now(),
     )
-    file = File('static\iter_bot.png', filename='iter_bot.png')
+    file = File("static/iter_bot.png", filename="iter_bot.png")
     return embed, file
