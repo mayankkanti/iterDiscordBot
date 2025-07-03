@@ -1,12 +1,14 @@
 import logging
 import time
+import pytz
+from datetime import datetime
 from .noticescrapper import get_new_notices, save_notices
 from discord.ext import commands, tasks
 
 from iter_bot.core import BaseCog, ITERBot
 from iter_bot.shared import EmbedType
 
-from config import NCHANNEL, LCHANNEL
+from config import NCHANNEL, TASK_FREQUENCY
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +20,9 @@ class NoticeCog(BaseCog):
 
     def __init__(self, bot: ITERBot):
         super().__init__(bot)
-        self.times_checked = 0
+        self.times_checked = -1
+        self.today_day = -1
+        self.start_time = time.time()
         self.bot.loop.create_task(self.start_notice_checker())
 
     async def start_notice_checker(self):
@@ -26,7 +30,7 @@ class NoticeCog(BaseCog):
         logger.info("Bot is ready. Starting notice_checker task.")
         self.notice_checker.start()
     
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=TASK_FREQUENCY)
     async def notice_checker(self):
         channel = self.bot.get_channel(NCHANNEL)
         if channel is None:
@@ -47,10 +51,22 @@ class NoticeCog(BaseCog):
             save_notices(all_notices)
 
         # Code for last update
+        today_day = datetime.now(pytz.timezone("Asia/Kolkata")).day
+        if self.today_day == today_day:
+            self.times_checked += 1
+        else:
+            self.times_checked = 1
+            self.today_day = today_day
         timestamp = f"<t:{int(time.time())}:R>"
-        self.times_checked += 1
-        await channel.edit(topic=f"Last Checked {timestamp} | Checked {self.times_checked}")
         
+        uptime_secs = int(time.time() - self.start_time)
+        uptime = f"{uptime_secs // 3600}h {(uptime_secs % 3600) // 60}m"
+        
+        topic = f'Last Checked: {timestamp} | Today: {self.times_checked} time' + ("s" if self.times_checked != 1 else "") + f' | Uptime: {uptime}'
+        
+        await channel.edit(topic=topic)
+        logger.info("Ran notice_checker task at %s", datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S"))
+
     @commands.command(name='checknotices', description="Force a notice check task.")
     async def checknotices(self, ctx: commands.Context):
         embed, file = await self.create_embed(
