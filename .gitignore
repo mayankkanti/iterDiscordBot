@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venv
 
+# Test Folders
+tests/
+
 # Secrets
 .env
 
